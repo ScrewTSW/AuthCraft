@@ -6,6 +6,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="src/libs/Minecraft_Mod.jar" sourcepath="/home/tdancs/Workspace/ProjectRestoration/hMod_128"/>
+	<classpathentry kind="lib" path="/hMod_128/run/Minecraft_Mod.jar" sourcepath="/hMod_128"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

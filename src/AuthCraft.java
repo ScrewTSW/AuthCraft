@@ -34,6 +34,10 @@ public class AuthCraft extends Plugin {
      */
     public long lastAlert = 0;
     /**
+     * Counter for alert messages. If kick-after-alerts > 0, kick player if alert counter has reached the pre-defined value
+     */
+    public long kickAfterAlerts = 0;
+    /**
      * The mode of the server
      */
     public boolean onlineMode;
@@ -42,6 +46,8 @@ public class AuthCraft extends Plugin {
      */
     public boolean registerInOfflineMode;
     private AuthCraftListener listener = null;
+    private HashMap<String, Long> alertDiff = new HashMap<>();
+    private HashMap<String, Integer> alertCounter = new HashMap<>();
     public boolean onlyAllowedUsersCanRegister;
 
     public void initialize() {
@@ -127,20 +133,42 @@ public class AuthCraft extends Plugin {
          * if (!etc.getDataSource().doesPlayerExist(player.getName())) { return true; }
          */
 
-        if (!authenticated.contains(player.getName().toLowerCase())) {
-            if (authTable.containsKey(player.getName().toLowerCase())) {
-                if (lastAlert == 0 || System.currentTimeMillis() - lastAlert > 1000) {
+        long diff = System.currentTimeMillis() - lastAlert;
+        String playerName = player.getName().toLowerCase();
+        if (!authenticated.contains(playerName)) {
+            if (authTable.containsKey(playerName)) {
+                if (lastAlert == 0 || diff > 1000) {
+                    int alertCount = 0;
+                    for (int i = 0; i < diff / 1000; i++) {
+                        alertCount = incrementPlayerAlertCounter(player.getName());
+                    }
+                    System.out.println("current system millis:"+System.currentTimeMillis()+" lastAlert:"+lastAlert+" diffSec:"+diff+" alert count:"+alertCount);
                     player.sendMessage(Colors.Rose + "Please identify yourself with /login <password>");
-                    lastAlert = System.currentTimeMillis();
+                    if (kickAfterAlerts > 0l && alertCount > kickAfterAlerts) {
+                        System.err.println("Player "+playerName+" failed to authenticate after:"+alertDiff.get(playerName)+" seconds.");
+                        alertDiff.remove(playerName);
+                        player.kick("Did not respond in time for auth request.");
+                    }
                 }
-
+                incrementPlayerAlertDiff(playerName, diff);
+                lastAlert = System.currentTimeMillis();
                 return true;
             } else if (onlineMode || registerInOfflineMode) {
-                if (lastAlert == 0 || System.currentTimeMillis() - lastAlert > 1000) {
-                    player.sendMessage(Colors.Rose + "Please register yourself with /register <password>");
-                    lastAlert = System.currentTimeMillis();
+                if (lastAlert == 0 || diff > 1000) {
+                    int alertCount = 0;
+                    for (int i = 0; i < diff / 1000; i++) {
+                        alertCount = incrementPlayerAlertCounter(player.getName());
+                    }
+                    System.out.println("current system millis:"+System.currentTimeMillis()+" lastAlert:"+lastAlert+" diffSec:"+diff+" alert count:"+alertCount);
+                    player.sendMessage(Colors.Rose + "Please identify yourself with /login <password>");
+                    if (kickAfterAlerts > 0l && alertCount > kickAfterAlerts) {
+                        System.err.println("Player "+playerName+" failed to authenticate after:"+alertDiff.get(playerName)+" seconds.");
+                        alertDiff.remove(playerName);
+                        player.kick("Did not respond in time for auth request.");
+                    }
                 }
-
+                incrementPlayerAlertDiff(playerName, diff);
+                lastAlert = System.currentTimeMillis();
                 return true;
             }
         }
@@ -148,6 +176,24 @@ public class AuthCraft extends Plugin {
         return false;
     }
 
+    private long incrementPlayerAlertDiff(String playerName, long timeDiff) {
+        long playerAlertTimer = timeDiff;
+        if (alertDiff.containsKey(playerName)) {
+            playerAlertTimer = alertDiff.get(playerName) + timeDiff;
+        }
+        alertDiff.put(playerName, playerAlertTimer);
+        return playerAlertTimer;
+    }
+    
+    private int incrementPlayerAlertCounter(String playerName) {
+        int count = 1;
+        if (alertCounter.containsKey(playerName)) {
+            count += alertCounter.get(playerName);
+        }
+        alertCounter.put(playerName, count);
+        return count;
+    }
+    
     /**
      * Copy key vars from one Player instance to another
      *
@@ -187,6 +233,7 @@ public class AuthCraft extends Plugin {
         onlineMode = properties.getBoolean("online-mode", true);
         onlyAllowedUsersCanRegister = properties.getBoolean("require-register-command", false);
         registerInOfflineMode = properties.getBoolean("register-offline", false);
+        kickAfterAlerts = properties.getLong("kick-after-alerts", 0);
 
         loadAuthEntries();
         saveAuthEntries(); // create the file initially if it does not exist
