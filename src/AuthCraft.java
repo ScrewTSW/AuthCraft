@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -46,7 +45,7 @@ public class AuthCraft extends Plugin {
     public boolean onlyAllowedUsersCanRegister;
 
     public void initialize() {
-        //log("Registering listeners");
+        // log("Registering listeners");
 
         listener = new AuthCraftListener(this);
 
@@ -58,7 +57,8 @@ public class AuthCraft extends Plugin {
         register(PluginLoader.Hook.LOGIN);
         register(PluginLoader.Hook.PLAYER_MOVE);
         register(PluginLoader.Hook.SERVERCOMMAND);
-        register(PluginLoader.Hook.OPEN_INVENTORY);
+//        register(PluginLoader.Hook.OPEN_INVENTORY);
+        register(PluginLoader.Hook.INVENTORY_CHANGE);
         register(PluginLoader.Hook.ITEM_DROP);
     }
 
@@ -69,7 +69,7 @@ public class AuthCraft extends Plugin {
      * @priority the priority to use
      */
     private void register(PluginLoader.Hook hook, PluginListener.Priority priority) {
-        //log("MineListener -> " + hook.toString());
+        // log("MineListener -> " + hook.toString());
 
         etc.getLoader().addListener(hook, listener, this, priority);
     }
@@ -86,17 +86,16 @@ public class AuthCraft extends Plugin {
     /**
      * Internal use - log a player in
      *
-     * @param player
-     *            the player to login
+     * @param player the player to login
      */
     public boolean _login(Player player) {
         if (etc.getDataSource().doesPlayerExist(player.getName())) {
             player.setAdmin(etc.getDataSource().getPlayer(player.getName()).isAdmin());
             player.setCanModifyWorld(etc.getDataSource().getPlayer(player.getName()).canBuild());
-            player.setCommands(etc.getDataSource().getPlayer(player.getName()).getCommands());
+            player.setCommands(etc.getDataSource().getPlayer(player.getName()).getCommands().toArray(new String[0]));
             player.setGroups(etc.getDataSource().getPlayer(player.getName()).getGroups());
             player.setIgnoreRestrictions(etc.getDataSource().getPlayer(player.getName()).canIgnoreRestrictions());
-            //IF THE REGISTERED FEW TIME AGO, HE MIGHT NOT HAVE A BACKUP
+            // IF THE REGISTERED FEW TIME AGO, HE MIGHT NOT HAVE A BACKUP
         }
         return true;
     }
@@ -119,31 +118,25 @@ public class AuthCraft extends Plugin {
     /**
      * Validate a player's auth
      *
-     * @param player
-     *            the Player to check
+     * @param player the Player to check
      * @return true if the player is not authenticated. false if the player is
      *         authenticated or not registered
      */
     public boolean checkAuth(Player player) {
-        /*if (!etc.getDataSource().doesPlayerExist(player.getName())) {
-            return true;
-        }*/
-    	
+        /*
+         * if (!etc.getDataSource().doesPlayerExist(player.getName())) { return true; }
+         */
         if (!authenticated.contains(player.getName().toLowerCase())) {
             if (authTable.containsKey(player.getName().toLowerCase())) {
-                if (lastAlert == 0
-                        || System.currentTimeMillis() - lastAlert > 1000) {
-                    player.sendMessage(Colors.Rose
-                            + "Please identify yourself with /login <password>");
+                if (lastAlert == 0 || System.currentTimeMillis() - lastAlert > 1000) {
+                    player.sendMessage(Colors.Rose + "Please identify yourself with /login <password>");
                     lastAlert = System.currentTimeMillis();
                 }
 
                 return true;
             } else if (onlineMode || registerInOfflineMode) {
-                if (lastAlert == 0
-                        || System.currentTimeMillis() - lastAlert > 1000) {
-                    player.sendMessage(Colors.Rose
-                            + "Please register yourself with /register <password>");
+                if (lastAlert == 0 || System.currentTimeMillis() - lastAlert > 1000) {
+                    player.sendMessage(Colors.Rose + "Please register yourself with /register <password>");
                     lastAlert = System.currentTimeMillis();
                 }
 
@@ -157,16 +150,14 @@ public class AuthCraft extends Plugin {
     /**
      * Copy key vars from one Player instance to another
      *
-     * @param player1
-     *            the player to copy from
-     * @param player2
-     *            the player to copy to
+     * @param player1 the player to copy from
+     * @param player2 the player to copy to
      * @return the copied player
      */
     private Player copyAccountData(Player player, Player player_) {
         player_.setAdmin(player.isAdmin());
         player_.setCanModifyWorld(player.canModifyWorld());
-        player_.setCommands(player.getCommands());
+        player_.setCommands(player.getCommands().toArray(new String[0]));
         player_.setGroups(player.getGroups());
         player_.setIgnoreRestrictions(player.canIgnoreRestrictions());
 
@@ -178,7 +169,7 @@ public class AuthCraft extends Plugin {
      */
     @Override
     public void disable() {
-        log(this.NAME + " - Server-side authentication disabled!");
+        log(AuthCraft.NAME + " - Server-side authentication disabled!");
         saveAuthEntries();
     }
 
@@ -187,9 +178,9 @@ public class AuthCraft extends Plugin {
      */
     @Override
     public void enable() {
-    	
-        setName(NAME);
-        log(this.NAME + " - Server-side authentication enabled.");
+
+        setName(AuthCraft.NAME);
+        log(AuthCraft.NAME + " - Server-side authentication enabled.");
 
         properties = new PropertiesFile("server.properties");
         onlineMode = properties.getBoolean("online-mode", true);
@@ -205,8 +196,7 @@ public class AuthCraft extends Plugin {
     /**
      * The encryption implementation to store passwords [as md5 (default)]
      *
-     * @param string
-     *            the string to encrypt
+     * @param string the string to encrypt
      * @default the encrypted string
      */
     public String encrypt(String string) {
@@ -250,7 +240,7 @@ public class AuthCraft extends Plugin {
         }
         if (lineCount > 150) {
             authTable = new HashMap<String, String>(lineCount + ((int) (lineCount * 0.40)));
-            
+
         }
 
         try {
@@ -288,12 +278,10 @@ public class AuthCraft extends Plugin {
     /**
      * Log a message
      *
-     * @param str
-     *            the string to log
+     * @param str the string to log
      */
     public void log(String str) {
-        System.out.println("[" + getName() + "] [v" + MAJOR + "." + MINOR + "."
-                + REVISION + "] " + str);
+        System.out.println("[" + getName() + "] [v" + MAJOR + "." + MINOR + "." + REVISION + "] " + str);
     }
 
     /**
@@ -363,10 +351,8 @@ public class AuthCraft extends Plugin {
     /**
      * Transform a string into one char
      *
-     * @param str
-     *            The string to transform
-     * @param chr
-     *            The char to transform all chars to (ie '*')
+     * @param str The string to transform
+     * @param chr The char to transform all chars to (ie '*')
      * @return the transformed string
      */
     public String transform(String str, char chr) {
@@ -382,29 +368,30 @@ public class AuthCraft extends Plugin {
     /**
      * Update the player cache
      *
-     * @param player
-     *            the player to update
+     * @param player the player to update
      */
     public void updatePlayerCache(Player player) {
         player.setCanModifyWorld(false); // lock them down!!
         player.setIgnoreRestrictions(false);
         player.setAdmin(false);
         if (canRegister(player)) {
-            player.setCommands(new String[]{"register", "login"});
+            player.setCommands(new String[] { "register", "login" });
         } else {
             player.setCommands(new String[0]);
         }
         player.setGroups(new String[0]);
         if (etc.getDataSource().doesPlayerExist(player.getName())) {
-            Player p = etc.getInstance().getDataSource().getPlayer(player.getName());
+            etc.getInstance();
+            Player p = etc.getDataSource().getPlayer(player.getName());
             if (p.canBuild()) {
                 player.setCanModifyWorld(true);
-                //playerCache.put(player.getName().toLowerCase(), new InventoryBackup(player));
+                // playerCache.put(player.getName().toLowerCase(), new InventoryBackup(player));
             }
         }
 
     }
-    public boolean canRegister(Player player){
+
+    public boolean canRegister(Player player) {
         return !onlyAllowedUsersCanRegister || player.canUseCommand("/register");
     }
 }

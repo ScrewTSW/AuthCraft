@@ -25,10 +25,15 @@ public class AuthCraftListener extends PluginListener {
 		return parent.checkAuth(player);
 	}
 
+//	@Override
+//	public boolean onOpenInventory(Player player, Inventory inventory) {
+//		return parent.checkAuth(player);
+//	}
+	
 	@Override
-	public boolean onOpenInventory(Player player, Inventory inventory) {
-		return parent.checkAuth(player);
-	}
+    public boolean onInventoryChange(Player player) {
+        return parent.checkAuth(player);
+    }
 
 	public boolean onItemDrop(Player player, Item item) {
 		return parent.checkAuth(player);
