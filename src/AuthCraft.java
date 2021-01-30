@@ -60,6 +60,8 @@ public class AuthCraft extends Plugin {
 //        register(PluginLoader.Hook.OPEN_INVENTORY);
         register(PluginLoader.Hook.INVENTORY_CHANGE);
         register(PluginLoader.Hook.ITEM_DROP);
+//        register(PluginLoader.Hook.HEALTH_CHANGE);
+        register(PluginLoader.Hook.DAMAGE);
     }
 
     /**
@@ -276,15 +278,6 @@ public class AuthCraft extends Plugin {
     }
 
     /**
-     * Log a message
-     *
-     * @param str the string to log
-     */
-    public void log(String str) {
-        System.out.println("[" + getName() + "] [v" + MAJOR + "." + MINOR + "." + REVISION + "] " + str);
-    }
-
-    /**
      * Get all of the inherited groups for a player
      *
      * @param player the player to get the inherited groups for
@@ -394,4 +387,17 @@ public class AuthCraft extends Plugin {
     public boolean canRegister(Player player) {
         return !onlyAllowedUsersCanRegister || player.canUseCommand("/register");
     }
+    
+    /**
+     * Log a message
+     *
+     * @param str the string to log
+     */
+    public void log(String str) {
+        System.out.println("[" + getName() + "] " + getVersion() + " " + str);
+    }
+    
+    public String getVersion() {
+        return new StringBuilder("[v").append(MAJOR).append(".").append(MINOR).append(".").append(REVISION).append("]").toString();
+    }    
 }

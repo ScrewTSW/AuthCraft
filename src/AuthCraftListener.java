@@ -17,6 +17,21 @@ public class AuthCraftListener extends PluginListener {
 		return parent.checkAuth(player);
 	}
 
+	@Override
+	public boolean onDamage(PluginLoader.DamageType type, BaseEntity attacker, BaseEntity defender, int amount) {
+//        log("Received new onDamage event.");
+//        if (attacker != null) log("Attacker:"+attacker.toString());
+//        if (defender != null) log("Defender:"+defender.toString());
+//        log("Amount:"+amount);
+	    if (defender!=null && defender.isPlayer()) {
+            return parent.checkAuth(defender.getPlayer());
+        }
+	    if (attacker!=null && attacker.isPlayer()) {
+            return parent.checkAuth(attacker.getPlayer());
+        }
+	    return false;
+    }
+
 	public boolean onBlockDestroy(Player player, Block block) {
 		return parent.checkAuth(player);
 	}
@@ -278,4 +293,13 @@ public class AuthCraftListener extends PluginListener {
 		}
 		return false;
 	}
+	
+	/**
+     * Log a message
+     *
+     * @param str the string to log
+     */
+    public void log(String str) {
+        System.out.println("[" + parent.getName() + "] " + parent.getVersion() + " " + str);
+    }
 }
