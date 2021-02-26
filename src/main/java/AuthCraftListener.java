@@ -9,7 +9,7 @@ public class AuthCraftListener extends PluginListener {
 		this.parent = parent;
 	}
 
-	public boolean onBlockCreate(Player player, Block blockPlaced, Block blockClicked, int itemInHand) {
+	public boolean onBlockPlace(Player player, Block blockPlaced, Block blockClicked, Item itemInHand) {
 		/*if (_DEBUG) {
 			System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 			System.out.println(Boolean.toString(parent.checkAuth(player)));
@@ -40,15 +40,10 @@ public class AuthCraftListener extends PluginListener {
 		return parent.checkAuth(player);
 	}
 
-//	@Override
-//	public boolean onOpenInventory(Player player, Inventory inventory) {
-//		return parent.checkAuth(player);
-//	}
-	
 	@Override
-    public boolean onInventoryChange(Player player) {
-        return parent.checkAuth(player);
-    }
+	public boolean onOpenInventory(Player player, Inventory inventory) {
+		return parent.checkAuth(player);
+	}
 
 	public boolean onItemDrop(Player player, Item item) {
 		return parent.checkAuth(player);

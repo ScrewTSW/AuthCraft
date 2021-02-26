@@ -13,7 +13,7 @@ public class AuthCraft extends Plugin {
 
     private static String NAME = "AuthCraft";
     private static int MAJOR = 1;
-    private static int MINOR = 0;
+    private static int MINOR = 1;
     private static int REVISION = 0;
 
     private PropertiesFile properties;
@@ -49,7 +49,7 @@ public class AuthCraft extends Plugin {
 
         listener = new AuthCraftListener(this);
 
-        register(PluginLoader.Hook.BLOCK_CREATED);
+        register(PluginLoader.Hook.BLOCK_PLACE);
         register(PluginLoader.Hook.BLOCK_DESTROYED);
         register(PluginLoader.Hook.CHAT);
         register(PluginLoader.Hook.COMMAND);
@@ -57,8 +57,7 @@ public class AuthCraft extends Plugin {
         register(PluginLoader.Hook.LOGIN);
         register(PluginLoader.Hook.PLAYER_MOVE);
         register(PluginLoader.Hook.SERVERCOMMAND);
-//        register(PluginLoader.Hook.OPEN_INVENTORY);
-        register(PluginLoader.Hook.INVENTORY_CHANGE);
+        register(PluginLoader.Hook.OPEN_INVENTORY);
         register(PluginLoader.Hook.ITEM_DROP);
 //        register(PluginLoader.Hook.HEALTH_CHANGE);
         register(PluginLoader.Hook.DAMAGE);
@@ -147,23 +146,6 @@ public class AuthCraft extends Plugin {
         }
 
         return false;
-    }
-
-    /**
-     * Copy key vars from one Player instance to another
-     *
-     * @param player1 the player to copy from
-     * @param player2 the player to copy to
-     * @return the copied player
-     */
-    private Player copyAccountData(Player player, Player player_) {
-        player_.setAdmin(player.isAdmin());
-        player_.setCanModifyWorld(player.canModifyWorld());
-        player_.setCommands(player.getCommands().toArray(new String[0]));
-        player_.setGroups(player.getGroups());
-        player_.setIgnoreRestrictions(player.canIgnoreRestrictions());
-
-        return player_;
     }
 
     /**
